@@ -18,9 +18,10 @@ El método get() ejecuta la consulta construida hasta ese momento y devuelve tod
 
 La colección es una instancia de  `Illuminate\Support\Collection ` que facilita la manipulación de los resultados de la consulta, como si fuera un array, pero con métodos adicionales útiles.
 Sintaxis del método get()
-
+```php
 DB::table('nombre_de_tabla')->get();
-
+```
+l
 `DB::table('nombre_de_tabla'):  //Se especifica la tabla con la que se trabajará (en este caso, nombre_de_tabla).`
 
 `->get(): //Se ejecuta la consulta y se devuelven todos los registros de la tabla especificada.`
