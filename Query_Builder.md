@@ -9,9 +9,7 @@ Route::get('/prueba', function () {
     // Aquí van las consultas
 });
 ```
-```php
 
-```
 
 #####  Explicación de métodos
 El método get() ejecuta la consulta construida hasta ese momento y devuelve todos los registros que cumplen con las condiciones establecidas, como una colección de objetos.
