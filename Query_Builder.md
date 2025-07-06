@@ -7,74 +7,40 @@ Creamos una ruta básica para probar nuestras consultas:
 ```php
 Route::get('/prueba', function () {
     // Aquí van las consultas
-});```
-##### 🔎 Métodos del Query Builder
-
-### 1. `find(id)`
+});
+```
 
 ```php
+
+```
+
+
+
+#####  Explicación de métodos
+```php
+find(valor_id)
+```
 $category = DB::table('categories')->find(4);
-return $category->name;
-```
-
-🔹 Devuelve un solo registro por **clave primaria** (`id`).  
-🔹 Equivalente a:
-
+Busca un registro por su ID primario.
 ```sql
-SELECT * FROM categories WHERE id = 4 LIMIT 1;
+Equivalente a: SELECT * FROM categories WHERE id = 4 LIMIT 1
 ```
+Devuelve un objeto (no una colección).
 
----
+Se accede así: $category->name, $category->id
 
-### 2. `where()` + `pluck()`
-
+#### where(campo, operador, valor)
 ```php
 $categories = DB::table('categories')
-                ->where('id', '>=', 2)
-                ->pluck('name', 'id');
-
-return $categories;
+    ->where('id', '>=', 2)
+    ->get();
 ```
+Aplica una condición tipo WHERE en SQL.
+Puedes encadenar múltiples where().
 
-🔹 `pluck('name', 'id')` devuelve un array asociativo:
 
-```php
-[
-  2 => 'Deportes',
-  3 => 'Tecnología',
-  4 => 'Moda'
-]
-```
 
----
 
-### 3. `get()`
-
-```php
-$categories = DB::table('categories')->get();
-```
-
-🔹 Devuelve una colección de todos los resultados.  
-🔹 Para acceder a cada elemento:
-
-```php
-foreach ($categories as $cat) {
-    echo $cat->name;
-}
-```
-
----
-
-### 4. `first()`
-
-```php
-$category = DB::table('categories')->where('id', 3)->first();
-return $category->name;
-```
-
-🔹 Devuelve solo el **primer registro** encontrado.
-
----
 
 ## 🔄 Transformación de resultados
 
