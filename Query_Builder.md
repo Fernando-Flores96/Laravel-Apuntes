@@ -25,12 +25,51 @@ l
 `DB::table('nombre_de_tabla'):  //Se especifica la tabla con la que se trabajará (en este caso, nombre_de_tabla).`
 
 `->get(): //Se ejecuta la consulta y se devuelven todos los registros de la tabla especificada.`
-
-
-
-
-
+#### Ejemplo de Uso
 ```php
+Route::get('/prueba',function(){
+    $categories = DB::table('categories')->get();
+    return $categories;
+});
+```
+Esto seria similar a ejecutar la consulta 
+```sql
+SELECT * FROM categories; 
+```
+El cual nos muestra el siguiente resultado
+```php
+```json
+[
+{
+"id": 1,
+"name": "Tecnologia",
+"slug": "tecnologia",
+"created_at": "2024-03-10 12:25:00",
+"updated_at": "2024-03-15 14:10:00"
+},
+{
+"id": 2,
+"name": "Desarrollo Web",
+"slug": "Desarrollo-Web",
+"created_at": "2023-06-17 09:45:00",
+"updated_at": "2023-06-18 10:00:00"
+},
+{
+"id": 3,
+"name": "Marketing Digital",
+"slug": "marketing-digital",
+"created_at": "2024-01-25 18:30:00",
+"updated_at": "2024-01-28 19:00:00"
+},
+{
+"id": 4,
+"name": "Educacion",
+"slug": "educacion",
+"created_at": "2023-11-05 15:10:00",
+"updated_at": "2023-11-06 16:45:00"
+}
+]
+```
 find(valor_id)
 ```
 $category = DB::table('categories')->find(4);
