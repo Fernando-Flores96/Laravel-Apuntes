@@ -9,14 +9,28 @@ Route::get('/prueba', function () {
     // Aquí van las consultas
 });
 ```
-
 ```php
 
 ```
 
-
-
 #####  Explicación de métodos
+El método get() ejecuta la consulta construida hasta ese momento y devuelve todos los registros que cumplen con las condiciones establecidas, como una colección de objetos.
+
+¿Qué significa "colección"?
+
+La colección es una instancia de  `Illuminate\Support\Collection ` que facilita la manipulación de los resultados de la consulta, como si fuera un array, pero con métodos adicionales útiles.
+Sintaxis del método get()
+
+```php DB::table('nombre_de_tabla')->get();
+```
+`DB::table('nombre_de_tabla'):  //Se especifica la tabla con la que se trabajará (en este caso, nombre_de_tabla).`
+
+`->get(): //Se ejecuta la consulta y se devuelven todos los registros de la tabla especificada.`
+
+
+
+
+
 ```php
 find(valor_id)
 ```
