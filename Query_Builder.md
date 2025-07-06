@@ -1,31 +1,33 @@
 # Laravel - Guía Práctica: Consultas con Query Builder (DB::table)
-##### 📌 ¿Qué es el Query Builder?
+#### 📌 ¿Qué es el Query Builder?
 El Query Builder de Laravel proporciona una forma fluida y segura de construir consultas SQL sin escribir SQL puro. Usa la clase DB de Laravel.
- `use Illuminate\Support\Facades\DB; `
-✅ Ruta de prueba
-Creamos una ruta básica para probar nuestras consultas:
+ `use Illuminate\Support\Facades\DB;`
+ 
+###✅ Ruta de prueba
+Antes de probar las consultas, crea una ruta temporal para visualizar los resultados en el navegador o Postman:
+
 ```php
 Route::get('/prueba', function () {
     // Aquí van las consultas
 });
 ```
+### Método: `get()`
 
+## ¿Qué hace?
 
-#####  Explicación de métodos
-El método get() ejecuta la consulta construida hasta ese momento y devuelve todos los registros que cumplen con las condiciones establecidas, como una colección de objetos.
+El método `get()` ejecuta la consulta construida hasta ese momento y devuelve todos los registros que cumplen con las condiciones especificadas.
 
-¿Qué significa "colección"?
+El resultado es una colección (`Illuminate\Support\Collection`), que permite trabajar de forma parecida a un array, pero con métodos útiles como `map()`, `filter()`, `pluck()`, etc.
 
-La colección es una instancia de  `Illuminate\Support\Collection ` que facilita la manipulación de los resultados de la consulta, como si fuera un array, pero con métodos adicionales útiles.
-Sintaxis del método get()
+## Sintaxis
 ```php
 DB::table('nombre_de_tabla')->get();
 ```
-l
-`DB::table('nombre_de_tabla'):  //Se especifica la tabla con la que se trabajará (en este caso, nombre_de_tabla).`
 
-`->get(): //Se ejecuta la consulta y se devuelven todos los registros de la tabla especificada.`
-#### Ejemplo de Uso
+- `DB::table('nombre_de_tabla'):  //Se especifica la tabla con la que se trabajará (en este caso, nombre_de_tabla).`
+
+- `->get(): //Se ejecuta la consulta y se devuelven todos los registros de la tabla especificada.`
+### Ejemplo
 ```php
 Route::get('/prueba',function(){
     $categories = DB::table('categories')->get();
@@ -36,8 +38,7 @@ Esto seria similar a ejecutar la consulta
 ```sql
 SELECT * FROM categories; 
 ```
-El cual nos muestra el siguiente resultado
-```php
+## Resultado esperado (JSON)
 ```json
 [
 {
@@ -70,6 +71,33 @@ El cual nos muestra el siguiente resultado
 }
 ]
 ```
+### Método: first()
+
+## ¿Qué hace?
+
+Devuelve solo el primer resultado de la consulta. Ideal cuando esperas una sola fila.
+
+## Sintaxis
+```php
+DB::table('tabla')->where('condicion')->first();
+```
+## Ejemplo
+```php
+Route::get('/prueba', function () {
+    $category = DB::table('categories')
+            ->where('id', 1)
+   ->first();
+    return $category;
+});
+```
+📾 Equivalente en SQL
+
+
+
+
+
+
+
 find(valor_id)
 ```
 $category = DB::table('categories')->find(4);
