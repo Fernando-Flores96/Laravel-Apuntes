@@ -71,6 +71,379 @@ SELECT * FROM categories;
 }
 ]
 ```
+## 2. Métodos de Selección: `select()`, `distinct()`, etc.
+
+Una vez que seleccionas una tabla, puedes especificar exactamente qué columnas deseas recuperar usando el método `select()`. Si no lo usas, Laravel selecciona todas las columnas por defecto (`SELECT *`).
+
+### 🔎 ¿Qué hacen?
+* `select()` → Especifica las columnas que se quieren recuperar.
+* `distinct()` → Elimina registros duplicados de los resultados.
+* `addSelect()` → Agrega más columnas a una selección existente.
+* `selectRaw()` → Permite escribir expresiones SQL completas (ver Sección especial `selectRaw()`).
+
+### 🌚 Comparación con SQL tradicional (MySQL)
+
+| Laravel Query Builder | SQL en MySQL |
+|----------------------|--------------|
+| `DB::table('categories')->select('id', 'name')->get();` | `SELECT id, name FROM categories;` |
+| `DB::table('categories')->distinct()->get();` | `SELECT DISTINCT * FROM categories;` |
+| `DB::table('categories')->select('id', 'name as category_name')->get();` | `SELECT id, name AS category_name FROM categories;` |
+| `DB::table('categories')->selectRaw('COUNT(*) as total')->get();` | `SELECT COUNT(*) as total FROM categories;` |
+
+### 🧱 Sintaxis
+
+```php
+DB::table('tabla')
+    ->select('columna1', 'columna2')
+    ->distinct()
+    ->get();
+```
+
+### 📋 Ejemplos Detallados
+
+#### Ejemplo 1: Selección básica de columnas
+```php
+Route::get('/seleccion-basica', function () {
+    $categorias = DB::table('categories')
+        ->select('id', 'name')
+        ->get();
+    
+    return $categorias;
+});
+```
+
+#### Ejemplo 2: Selección con alias
+```php
+Route::get('/seleccion-alias', function () {
+    $categorias = DB::table('categories')
+        ->select('id', 'name as categoria_nombre', 'slug as enlace')
+        ->get();
+    
+    return $categorias;
+});
+```
+
+#### Ejemplo 3: Eliminar duplicados con `distinct()`
+```php
+Route::get('/seleccion-distinct', function () {
+    $categorias = DB::table('categories')
+        ->select('name')
+        ->distinct()
+        ->get();
+    
+    return $categorias;
+});
+```
+
+#### Ejemplo 4: Agregar columnas con `addSelect()`
+```php
+Route::get('/seleccion-agregar', function () {
+    $categorias = DB::table('categories')
+        ->select('id', 'name')
+        ->addSelect('created_at', 'updated_at')
+        ->get();
+    
+    return $categorias;
+});
+```
+
+#### Ejemplo 5: Selección con funciones SQL usando `selectRaw()`
+```php
+Route::get('/seleccion-raw', function () {
+    $estadisticas = DB::table('categories')
+        ->selectRaw('COUNT(*) as total_categorias')
+        ->selectRaw('MAX(created_at) as ultima_categoria')
+        ->get();
+    
+    return $estadisticas;
+});
+```
+
+### 📤 Resultado esperado (JSON)
+
+**Ejemplo básico:**
+```json
+[
+    {
+        "id": 1,
+        "name": "Tecnologia"
+    },
+    {
+        "id": 2,
+        "name": "Educacion"
+    },
+    {
+        "id": 3,
+        "name": "Marketing Digital"
+    }
+]
+```
+
+**Ejemplo con alias:**
+```json
+[
+    {
+        "id": 1,
+        "categoria_nombre": "Tecnologia",
+        "enlace": "tecnologia"
+    },
+    {
+        "id": 2,
+        "categoria_nombre": "Educacion",
+        "enlace": "educacion"
+    }
+]
+```
+
+### 🧠 Notas útiles
+* Puedes combinar `select()` con `join()` y `groupBy()` para consultas más avanzadas.
+* Usa `selectRaw()` si necesitas expresiones SQL complejas como alias, funciones agregadas, concatenaciones, etc.
+* El método `distinct()` elimina duplicados de **todo el resultado**, no solo de una columna específica.
+* Si usas `addSelect()`, debe haber una selección previa con `select()`.
+
+---
+
+## 3. Métodos de Filtro: `where()`, `orWhere()`, `whereIn()`, `whereNull()`, etc.
+
+Ahora es el momento de aplicar los filtros a tu consulta. Usas los métodos `where()` para establecer las condiciones que deben cumplir los registros que quieres obtener.
+
+### 🔎 ¿Qué hacen?
+* `where()` → Aplica una condición simple (`=` por defecto).
+* `orWhere()` → Agrega una condición alternativa (`OR`).
+* `whereIn()` / `whereNotIn()` → Verifica si un valor está (no está) dentro de una lista.
+* `whereNull()` / `whereNotNull()` → Evalúan si una columna es (no) nula.
+* `whereBetween()` / `whereNotBetween()` → Evalúa si un valor está (no está) dentro de un rango.
+* `whereDate()`, `whereYear()`, `whereMonth()`, `whereDay()` → Para trabajar con fechas.
+* `whereLike()` → Para búsquedas con patrones (equivalente a `where('column', 'LIKE', '%value%')`).
+
+### 🌚 Comparación con SQL tradicional (MySQL)
+
+| Laravel Query Builder | SQL en MySQL |
+|----------------------|--------------|
+| `DB::table('categories')->where('slug', 'tecnologia')` | `SELECT * FROM categories WHERE slug = 'tecnologia';` |
+| `->orWhere('name', 'Tecnologia Avanzada')` | `OR name = 'Tecnologia Avanzada'` |
+| `->whereIn('id', [1, 2, 3])` | `WHERE id IN (1, 2, 3)` |
+| `->whereNull('deleted_at')` | `WHERE deleted_at IS NULL` |
+| `->whereBetween('id', [1, 3])` | `WHERE id BETWEEN 1 AND 3` |
+| `->where('price', '>', 100)` | `WHERE price > 100` |
+| `->where('name', 'LIKE', '%tech%')` | `WHERE name LIKE '%tech%'` |
+
+### 🧱 Sintaxis
+
+```php
+DB::table('tabla')
+    ->where('columna', 'valor')                    // Condición simple
+    ->where('columna', '>', 'valor')               // Con operador
+    ->orWhere('columna', 'valor')                  // Condición OR
+    ->whereIn('columna', [valor1, valor2])         // Dentro de lista
+    ->whereNull('columna')                         // Valor nulo
+    ->whereBetween('columna', [min, max])          // Dentro de rango
+    ->whereDate('fecha', '2024-01-15')             // Filtro por fecha
+    ->get();
+```
+
+### 📋 Ejemplos Detallados
+
+#### Ejemplo 1: Filtros básicos con `where()`
+```php
+Route::get('/filtro-basico', function () {
+    $categorias = DB::table('categories')
+        ->where('slug', 'tecnologia')
+        ->get();
+    
+    return $categorias;
+});
+```
+
+#### Ejemplo 2: Filtros con operadores de comparación
+```php
+Route::get('/filtro-operadores', function () {
+    $productos = DB::table('products')
+        ->where('price', '>', 100)           // Mayor que
+        ->where('stock', '<=', 50)           // Menor o igual
+        ->where('status', '!=', 'inactive')  // Diferente de
+        ->get();
+    
+    return $productos;
+});
+```
+
+#### Ejemplo 3: Filtros con `orWhere()`
+```php
+Route::get('/filtro-or', function () {
+    $categorias = DB::table('categories')
+        ->where('slug', 'tecnologia')
+        ->orWhere('name', 'Tecnologia Avanzada')
+        ->orWhere('id', 5)
+        ->get();
+    
+    return $categorias;
+});
+```
+
+#### Ejemplo 4: Filtros con `whereIn()` y `whereNotIn()`
+```php
+Route::get('/filtro-in', function () {
+    $categorias = DB::table('categories')
+        ->whereIn('id', [1, 2, 3, 4])
+        ->whereNotIn('status', ['deleted', 'inactive'])
+        ->get();
+    
+    return $categorias;
+});
+```
+
+#### Ejemplo 5: Filtros con valores nulos
+```php
+Route::get('/filtro-null', function () {
+    $categorias = DB::table('categories')
+        ->whereNull('deleted_at')        // Solo activas
+        ->whereNotNull('description')    // Que tengan descripción
+        ->get();
+    
+    return $categorias;
+});
+```
+
+#### Ejemplo 6: Filtros con rangos usando `whereBetween()`
+```php
+Route::get('/filtro-between', function () {
+    $productos = DB::table('products')
+        ->whereBetween('price', [50, 500])
+        ->whereNotBetween('created_at', ['2023-01-01', '2023-06-30'])
+        ->get();
+    
+    return $productos;
+});
+```
+
+#### Ejemplo 7: Filtros por fechas específicas
+```php
+Route::get('/filtro-fechas', function () {
+    $pedidos = DB::table('orders')
+        ->whereDate('created_at', '2024-01-15')    // Fecha específica
+        ->whereYear('created_at', 2024)            // Año específico
+        ->whereMonth('created_at', 1)              // Mes específico
+        ->whereDay('created_at', 15)               // Día específico
+        ->get();
+    
+    return $pedidos;
+});
+```
+
+#### Ejemplo 8: Búsquedas con patrones usando `LIKE`
+```php
+Route::get('/filtro-like', function () {
+    $categorias = DB::table('categories')
+        ->where('name', 'LIKE', '%tech%')          // Contiene 'tech'
+        ->where('description', 'LIKE', 'Laravel%') // Empieza con 'Laravel'
+        ->where('slug', 'LIKE', '%web')            // Termina con 'web'
+        ->get();
+    
+    return $categorias;
+});
+```
+
+#### Ejemplo 9: Agrupación de condiciones complejas
+```php
+Route::get('/filtro-agrupado', function () {
+    $productos = DB::table('products')
+        ->where('status', 'active')
+        ->where(function ($query) {
+            $query->where('category_id', 1)
+                  ->orWhere('category_id', 2);
+        })
+        ->where(function ($query) {
+            $query->where('price', '<', 100)
+                  ->orWhere('on_sale', true);
+        })
+        ->get();
+    
+    return $productos;
+});
+```
+
+#### Ejemplo 10: Combinación completa de filtros
+```php
+Route::get('/filtrado-completo', function () {
+    $resultados = DB::table('categories')
+        ->where('slug', 'tecnologia')
+        ->orWhere('name', 'Tecnologia Avanzada')
+        ->whereIn('id', [1, 2, 3])
+        ->whereNull('deleted_at')
+        ->whereBetween('id', [1, 3])
+        ->get();
+    
+    return $resultados;
+});
+```
+
+### 📤 Resultado esperado (JSON)
+
+**Ejemplo básico:**
+```json
+[
+    {
+        "id": 1,
+        "name": "Tecnologia",
+        "slug": "tecnologia",
+        "deleted_at": null,
+        "created_at": "2024-01-15T10:30:00.000000Z"
+    }
+]
+```
+
+**Ejemplo con múltiples filtros:**
+```json
+[
+    {
+        "id": 1,
+        "name": "Tecnologia",
+        "slug": "tecnologia",
+        "deleted_at": null
+    },
+    {
+        "id": 2,
+        "name": "Tecnologia Avanzada",
+        "slug": "tecnologia-avanzada",
+        "deleted_at": null
+    }
+]
+```
+
+### 🧠 Notas útiles
+* **Precedencia de operadores**: `AND` tiene mayor precedencia que `OR`. Usa paréntesis (funciones anónimas) para agrupar condiciones.
+* **Rendimiento**: Los filtros con índices en la base de datos son más rápidos. Asegúrate de indexar las columnas que usas frecuentemente en `where()`.
+* **Seguridad**: Laravel automaticamente escapa los valores para prevenir inyección SQL.
+* **Combinación con otros métodos**: Puedes combinar filtros con `select()`, `orderBy()`, `limit()`, etc.
+* **Filtros dinámicos**: Puedes usar condicionales PHP para aplicar filtros solo cuando sea necesario:
+
+```php
+$query = DB::table('products');
+
+if ($request->has('category')) {
+    $query->where('category_id', $request->category);
+}
+
+if ($request->has('min_price')) {
+    $query->where('price', '>=', $request->min_price);
+}
+
+$productos = $query->get();
+```
+
+### 🚀 Operadores disponibles para `where()`
+
+| Operador | Descripción | Ejemplo |
+|----------|-------------|---------|
+| `=` | Igual (por defecto) | `->where('id', 1)` |
+| `!=` o `<>` | Diferente | `->where('status', '!=', 'deleted')` |
+| `>` | Mayor que | `->where('price', '>', 100)` |
+| `>=` | Mayor o igual | `->where('age', '>=', 18)` |
+| `<` | Menor que | `->where('stock', '<', 10)` |
+| `<=` | Menor o igual | `->where('discount', '<=', 50)` |
+| `LIKE` | Búsqueda con patrones | `->where('name', 'LIKE', '%john%')` |
+| `NOT LIKE` | Búsqueda negativa | `->where('email', 'NOT LIKE', '%spam%')` |
 # Laravel Query Builder - Métodos de Ordenamiento
 
 ## 4. Métodos de Ordenamiento: `orderBy()`, `orderByDesc()`
